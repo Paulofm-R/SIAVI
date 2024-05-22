@@ -1,11 +1,15 @@
 import tkinter as tk
 import subprocess
+import sys
 
 def open_script(script_name):
     # Fecha a janela principal
     root.destroy()
     # Abre o novo script
-    subprocess.run(['python', script_name])
+    subprocess.Popen([sys.executable, script_name])
+
+    # Encerra o script atual
+    sys.exit()
 
 root = tk.Tk()
 root.title("Menu Principal")

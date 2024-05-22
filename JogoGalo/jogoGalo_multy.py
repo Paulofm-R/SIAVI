@@ -1,5 +1,8 @@
 import cv2 as cv
 import mediapipe as mp
+import random
+import subprocess
+import sys
 
 win = ''
 player1_wins = 0
@@ -11,7 +14,8 @@ mp_hands = mp.solutions.hands
 
 cont = 0
 
-player_turn = "player1"
+player_turn = random.choice(["player1", "player2"])
+moves = 0
 
 squares = {
     1: {
@@ -89,6 +93,13 @@ resetSquare = {
     "y2": 0,
 }
 
+exitSquare = {
+    "x1": 0,
+    "y1": 0,
+    "x2": 0,
+    "y2": 0,
+}
+
 
 def set_squares(frame_height, frame_width):
     global squares, resetSquare
@@ -118,9 +129,14 @@ def set_squares(frame_height, frame_width):
     resetSquare["x2"] = 300
     resetSquare["y2"] = int((frame_height / 2) + 82)
 
+    exitSquare["x1"] = frame_width - 100
+    exitSquare["y1"] = int((frame_height / 2) - 82)
+    exitSquare["x2"] = frame_width - 300
+    exitSquare["y2"] = int((frame_height / 2) + 82)
+
 
 def getHandMove(hand_landmarks):
-    global squares, cont, player_turn
+    global squares, cont, player_turn, moves
 
     landmarks = hand_landmarks.landmark
 
@@ -129,7 +145,7 @@ def getHandMove(hand_landmarks):
 
     finger_in_square = False  # Flag para indicar se o dedo está em algum quadrado
 
-    if win == "":
+    if win == "" and moves < 9:
         for square_id, square_data in squares.items():
             x1, y1, x2, y2 = square_data["x1"], square_data["y1"], square_data["x2"], square_data["y2"]
             if x1 < indicador_x < x2 and y1 < indicador_y < y2:
@@ -144,6 +160,8 @@ def getHandMove(hand_landmarks):
                         check_winner(squares)
                         if win != "":
                             print(win)
+                        else:
+                            moves += 1
 
                         # trocar a vez do jogador
                         player_turn = "player1" if player_turn == "player2" else "player2"
@@ -153,19 +171,14 @@ def getHandMove(hand_landmarks):
             cont += 1
             if cont >= 25:  # Se o dedo estiver no local por 50 frames
                 reset()
+        if exitSquare["x1"] > indicador_x > exitSquare["x2"] and exitSquare["y1"] < indicador_y < exitSquare["y2"]:
+            finger_in_square = True
+            cont += 1
+            if cont >= 25:  # Se o dedo estiver no local por 50 frames
+                exit()
 
     if not finger_in_square:
         cont = 0  # Resetar o contador se o dedo não estiver em nenhum quadrado
-
-
-def reset():
-    global win, squares
-
-    win = ""
-    for square in squares.values():
-        square["player1"] = False
-        square["player2"] = False
-
 
 def check_winner(squares):
     global win, player1_wins, player2_wins
@@ -200,6 +213,26 @@ def check_winner(squares):
     elif win == "player2":
         player2_wins += 1
 
+def reset():
+    global win, squares, moves, player_turn
+
+    win = ""
+    moves = 0
+    player_turn = random.choice(["player1", "player2"])
+    for square in squares.values():
+        square["player1"] = False
+        square["player2"] = False
+
+def exit():
+    # Fecha todas as janelas do OpenCV
+    cv.destroyAllWindows()
+    cv.waitKey(1)  # Garante que todas as janelas sejam fechadas
+
+    # Inicia o novo script usando subprocess.Popen
+    subprocess.Popen([sys.executable, "./JogoGalo/jogoGalo_menu.py"])
+
+    # Encerra o script atual
+    sys.exit()
 
 vid = cv.VideoCapture(0)
 
@@ -253,11 +286,21 @@ with mp_hands.Hands(
         if hls and len(hls) == 1:
             getHandMove(hls[0])
 
-        if win != "":  # Para não ser afetado com a inversão da tela
+        if win != "" or moves >= 9:  # Para não ser afetado com a inversão da tela
             cv.rectangle(frame, (resetSquare["x1"], resetSquare["y1"]),
                          (resetSquare["x2"], resetSquare["y2"]), (174, 173, 178), 3)
+            cv.rectangle(frame, (exitSquare["x1"], exitSquare["y1"]),
+                         (exitSquare["x2"], exitSquare["y2"]), (174, 173, 178), 3)
 
         frame = cv.flip(frame, 1)
+
+        # Exibir quem joga
+        if player_turn == "player1":
+            cv.rectangle(frame, (40, 18),
+                    (240, 60), (0, 255, 0), -1)
+        else:
+            cv.rectangle(frame, (frame_width - 210, 18),
+                    (frame_width - 10, 60), (0, 255, 0), -1)
 
         # Exibe a pontuação
         cv.putText(frame, f"Player 1: {player1_wins}", (50, 50),
@@ -265,13 +308,21 @@ with mp_hands.Hands(
         cv.putText(frame, f"Player 2: {player2_wins}", (frame_width -
                    200, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        if win != "":
+        if win != "" or moves >= 9:
+            final_sentence = ""
+            if win != "":
+                final_sentence = f"{win.upper()} WIN!!"
+            else:
+                final_sentence = "DRAW!!"
+
             cv.rectangle(frame, (int((frame_width / 2) - 200), int((frame_height / 2) - 75)),
                          (int((frame_width / 2) + 200), int((frame_height / 2) + 75)), (0, 0, 0), -1)
-            cv.putText(frame, f"{win.upper()} WIN!!", (int((frame_width / 2) - 170), int(
+            cv.putText(frame, final_sentence, (int((frame_width / 2) - 165), int(
                 (frame_height / 2) + 20)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
 
-            cv.putText(frame, "RESTAR", (frame_width - 255, int((frame_height / 2) - 90)),
+            cv.putText(frame, "RESET", (frame_width - 255, int((frame_height / 2) - 90)),
+                       cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv.putText(frame, "EXIT", (150, int((frame_height / 2) - 90)),
                        cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         # Resize frame to increase its size
