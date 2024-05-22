@@ -21,7 +21,7 @@ X_OFFSET = (640 - GRID_WIDTH) // 2
 Y_OFFSET = (480 - GRID_HEIGHT) // 2
 
 # Load gear icon image
-gear_icon_path = "gear_icon.png"  # Path to your gear icon image
+gear_icon_path = "./QuatroLinha/gear_icon.png"  # Path to your gear icon image
 gear_icon = cv2.imread(gear_icon_path, cv2.IMREAD_UNCHANGED)
 
 # Initialize game board
