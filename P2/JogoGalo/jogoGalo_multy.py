@@ -3,6 +3,7 @@ import mediapipe as mp
 import random
 import subprocess
 import sys
+from screeninfo import get_monitors
 
 win = ''
 player1_wins = 0
@@ -101,21 +102,21 @@ exitSquare = {
 }
 
 
-def set_squares(frame_height, frame_width):
+def set_squares(screen_height, screen_width):
     global squares, resetSquare
     # Número de linhas e colunas
     num_rows = 3
     num_cols = 3
 
     # Tamanho dos quadrados
-    square_size = min(frame_width, frame_height) // max(num_rows, num_cols)
+    square_size = min(screen_width, screen_height) // max(num_rows, num_cols)
 
     # Desenhar os quadrados na tela
     for i in range(num_rows):
         for j in range(num_cols):
             square_number = i * num_cols + j + 1
-            x1 = j * square_size + (frame_width - num_cols * square_size) // 2
-            y1 = i * square_size + (frame_height - num_rows * square_size) // 2
+            x1 = j * square_size + (screen_width - num_cols * square_size) // 2
+            y1 = i * square_size + (screen_height - num_rows * square_size) // 2
             x2 = x1 + square_size
             y2 = y1 + square_size
 
@@ -125,14 +126,14 @@ def set_squares(frame_height, frame_width):
             squares[square_number]["y2"] = y2
 
     resetSquare["x1"] = 100
-    resetSquare["y1"] = int((frame_height / 2) - 82)
+    resetSquare["y1"] = int((screen_height / 2) - 82)
     resetSquare["x2"] = 300
-    resetSquare["y2"] = int((frame_height / 2) + 82)
+    resetSquare["y2"] = int((screen_height / 2) + 82)
 
-    exitSquare["x1"] = frame_width - 100
-    exitSquare["y1"] = int((frame_height / 2) - 82)
-    exitSquare["x2"] = frame_width - 300
-    exitSquare["y2"] = int((frame_height / 2) + 82)
+    exitSquare["x1"] = screen_width - 100
+    exitSquare["y1"] = int((screen_height / 2) - 82)
+    exitSquare["x2"] = screen_width - 300
+    exitSquare["y2"] = int((screen_height / 2) + 82)
 
 
 def getHandMove(hand_landmarks):
@@ -140,8 +141,8 @@ def getHandMove(hand_landmarks):
 
     landmarks = hand_landmarks.landmark
 
-    indicador_x = int(landmarks[8].x * frame_width)
-    indicador_y = int(landmarks[8].y * frame_height)
+    indicador_x = int(landmarks[8].x * screen_width)
+    indicador_y = int(landmarks[8].y * screen_height)
 
     finger_in_square = False  # Flag para indicar se o dedo está em algum quadrado
 
@@ -248,7 +249,13 @@ with mp_hands.Hands(
             break
         frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
-        frame_height, frame_width, _ = frame.shape
+        # Obtém a resolução da tela
+        screen = get_monitors()[0]
+        screen_width = int(screen.width - (screen.width / 10))
+        screen_height = int(screen.height - (screen.height / 10))
+
+        # Redimensiona o frame para se ajustar à tela
+        frame = cv.resize(frame, (screen_width, screen_height))
 
         results = hands.process(frame)
 
@@ -263,7 +270,7 @@ with mp_hands.Hands(
                     mp_drawing_styles.get_default_hand_connections_style(),
                 )
 
-        set_squares(frame_height, frame_width)
+        set_squares(screen_height, screen_width)
 
         for square_number, square_info in squares.items():
             x1, y1, x2, y2 = square_info["x1"], square_info["y1"], square_info["x2"], square_info["y2"]
@@ -299,13 +306,13 @@ with mp_hands.Hands(
             cv.rectangle(frame, (40, 18),
                     (240, 60), (0, 255, 0), -1)
         else:
-            cv.rectangle(frame, (frame_width - 210, 18),
-                    (frame_width - 10, 60), (0, 255, 0), -1)
+            cv.rectangle(frame, (screen_width - 210, 18),
+                    (screen_width - 10, 60), (0, 255, 0), -1)
 
         # Exibe a pontuação
         cv.putText(frame, f"Player 1: {player1_wins}", (50, 50),
                    cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        cv.putText(frame, f"Player 2: {player2_wins}", (frame_width -
+        cv.putText(frame, f"Player 2: {player2_wins}", (screen_width -
                    200, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         if win != "" or moves >= 9:
@@ -315,18 +322,15 @@ with mp_hands.Hands(
             else:
                 final_sentence = "DRAW!!"
 
-            cv.rectangle(frame, (int((frame_width / 2) - 200), int((frame_height / 2) - 75)),
-                         (int((frame_width / 2) + 200), int((frame_height / 2) + 75)), (0, 0, 0), -1)
-            cv.putText(frame, final_sentence, (int((frame_width / 2) - 165), int(
-                (frame_height / 2) + 20)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
+            cv.rectangle(frame, (int((screen_width / 2) - 200), int((screen_height / 2) - 75)),
+                         (int((screen_width / 2) + 200), int((screen_height / 2) + 75)), (0, 0, 0), -1)
+            cv.putText(frame, final_sentence, (int((screen_width / 2) - 165), int(
+                (screen_height / 2) + 20)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
 
-            cv.putText(frame, "RESET", (frame_width - 255, int((frame_height / 2) - 90)),
+            cv.putText(frame, "RESET", (screen_width - 255, int((screen_height / 2) - 90)),
                        cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            cv.putText(frame, "EXIT", (150, int((frame_height / 2) - 90)),
+            cv.putText(frame, "EXIT", (150, int((screen_height / 2) - 90)),
                        cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-
-        # Resize frame to increase its size
-        frame = cv.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
 
         cv.imshow('frame', frame)
 

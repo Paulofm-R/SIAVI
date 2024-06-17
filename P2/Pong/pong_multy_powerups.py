@@ -424,6 +424,8 @@ with mp_hands.Hands(
 
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
+        if cv.waitKey(1) & 0xFF == ord('r'):
+            reset()
 
 vid.release()
 cv.destroyAllWindows()

@@ -15,8 +15,6 @@ life_image = cv.resize(life_image, (50, 50))  # Redimensionar a imagem se necess
 if life_image.shape[2] == 4:
     life_image = cv.cvtColor(life_image, cv.COLOR_BGRA2BGR)
     
-print(life_image.shape)
-
 
 RAQUETE_WIDTH = 175
 RAQUETE_HEIGHT = 25
@@ -43,6 +41,7 @@ bolas = {
 }
 
 lifes = 3
+lifes_cont = 0
 
 set = False
 quantidade_raquetes = 1
@@ -79,7 +78,7 @@ def set_squares(frame_height, frame_width):
     exitSquare["y2"] = int((frame_height / 2) + 82)
 
 def update_ball_position(screen_width, screen_height):
-    global player1_score, quantidade_raquetes, ultimo_ponto_tempo
+    global player1_score, quantidade_raquetes, ultimo_ponto_tempo, lifes
     # Criar uma cópia do dicionário bolas antes de iterar sobre ele
     bolas_copy = bolas.copy()
     current_time = time.time()
@@ -118,11 +117,17 @@ def update_ball_position(screen_width, screen_height):
                     bola["velocidade_x"] += 3
                     bola["velocidade_y"] += 3
         
+        if lifes_cont >= 10:
+                lifes += 1
+                lifes_cont = 0
+
         if player1_score > 5 and len(bolas) == 1:
             adicionar_bola(screen_width, screen_height)
-        if player1_score > 10 and len(bolas) == 2:
+        if player1_score > 15 and len(bolas) == 2:
             adicionar_bola(screen_width, screen_height)
             quantidade_raquetes += 1
+        if player1_score > 30 and len(bolas) == 3:
+            adicionar_bola(screen_width, screen_height)
                     
 
         # Verificar colisão com as bordas laterais
@@ -169,9 +174,6 @@ def inicial_set(screen_width, screen_height):
 
 
 def adicionar_bola(screen_width, screen_height):
-    global lifes
-
-    lifes += 1
     bolas[len(bolas) + 1] = {
         "x": random.randint(0, screen_width),
         "y": random.randint(0, screen_height),
