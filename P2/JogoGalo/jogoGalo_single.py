@@ -102,7 +102,7 @@ exitSquare = {
 
 
 def set_squares(frame_height, frame_width):
-    global squares, resetSquare
+    global squares, resetSquare, exitSquare
     # Número de linhas e colunas
     num_rows = 3
     num_cols = 3
