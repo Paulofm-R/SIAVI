@@ -322,7 +322,7 @@ with mp_hands.Hands(
                 final_sentence = "DRAW!!"
 
             cv.rectangle(frame, (int((screen_width / 2) - 200), int((screen_height / 2) - 75)),
-                         (int((screen_width / 2) + 200), int((screen_height / 2) + 75)), (0, 0, 0), -1)
+                         (int((screen_width / 2) + 225), int((screen_height / 2) + 75)), (255, 140, 0), -1)
             cv.putText(frame, final_sentence, (int((screen_width / 2) - 165), int(
                 (screen_height / 2) + 20)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
 
