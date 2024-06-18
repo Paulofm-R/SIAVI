@@ -32,6 +32,19 @@ player_turn = 1
 game_over = False
 selected_column = None  # Initialize selected column as None
 
+
+# Reset button parameters
+RESET_BUTTON_X = 50  # X position of the reset button
+RESET_BUTTON_Y = 620  # Y position of the reset button
+RESET_BUTTON_SIZE = 100  # Size of the reset button
+reset_active = False  # Flag to indicate if reset is active
+
+
+
+
+
+
+
 # Constants for gesture sensitivity and smoothing
 THUMBS_UP_THRESHOLD = 0.9  # Adjust as needed
 SMOOTHING_ALPHA = 0.5  # Smoothing factor
@@ -189,6 +202,17 @@ def evaluate_window(window, player):
         score -= 4
 
     return score
+
+
+ # Draw reset button
+    cv2.rectangle(frame, (RESET_BUTTON_X, RESET_BUTTON_Y),
+                  (RESET_BUTTON_X + RESET_BUTTON_SIZE, RESET_BUTTON_Y + RESET_BUTTON_SIZE),
+                  (255, 255, 255), 2)
+    cv2.putText(frame, "RESET", (RESET_BUTTON_X + 10, RESET_BUTTON_Y + 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+
+
+
 
 # Function to display the win screen and reset button
 def display_win_screen(frame, player):
