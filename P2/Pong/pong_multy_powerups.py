@@ -221,7 +221,6 @@ def reset(screen_width, screen_height):
 def exit():
     # Fecha todas as janelas do OpenCV
     cv.destroyAllWindows()
-    cv.waitKey(1)  # Garante que todas as janelas sejam fechadas
 
     # Inicia o novo script usando subprocess.Popen
     subprocess.Popen([sys.executable, "./Pong/pong_menu.py"])
@@ -401,7 +400,7 @@ with mp_hands.Hands(
 
         current_time = time.time()
 
-        if current_time - ultima_roleta_tempo >= ROLETA_INTERVALO:
+        if current_time - ultima_roleta_tempo >= ROLETA_INTERVALO and remaining_time > 0:
             roleta_ativa = True
             roleta_start_time = current_time
             ultima_roleta_tempo = current_time

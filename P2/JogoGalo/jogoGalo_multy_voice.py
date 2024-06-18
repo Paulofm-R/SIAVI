@@ -3,10 +3,19 @@ import tkinter as tk
 import speech_recognition as sr
 import threading
 import random
+import subprocess
+import sys
 
 # Configurações iniciais da interface
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
+
+def exit():
+    # Inicia o novo script usando subprocess.Popen
+    subprocess.Popen([sys.executable, "./JogoGalo/jogoGalo_menu.py"])
+
+    # Encerra o script atual
+    sys.exit()
 
 class TicTacToe:
     def __init__(self, root):
@@ -113,10 +122,19 @@ class TicTacToe:
         mapping = {
             "um": 0, "dois": 1, "três": 2,
             "quatro": 3, "cinco": 4, "seis": 5,
-            "sete": 6, "oito": 7, "nove": 8
+            "sete": 6, "oito": 7, "nove": 8,
+            "sair": "exit"
         }
         if command in mapping:
-            self.player_move(mapping[command])
+            if command == "sair":
+                exit()
+            else:
+                self.player_move(mapping[command])
+    
+    def exit_game(self):
+        self.root.quit()  # Fecha a janela do tkinter
+        self.root.update()  # Garante que a janela seja fechada antes de iniciar o novo script
+        exit()  # Chama a função exit para iniciar o novo script e encerrar o atual
 
 if __name__ == "__main__":
     root = ctk.CTk()

@@ -157,7 +157,6 @@ def reset(screen_width, screen_height):
 def exit():
     # Fecha todas as janelas do OpenCV
     cv.destroyAllWindows()
-    cv.waitKey(1)  # Garante que todas as janelas sejam fechadas
 
     # Inicia o novo script usando subprocess.Popen
     subprocess.Popen([sys.executable, "./Pong/pong_menu.py"])

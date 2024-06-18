@@ -2,8 +2,7 @@ import cv2 as cv
 import mediapipe as mp
 import subprocess
 import sys
-import numpy as np
-import screeninfo
+from screeninfo import get_monitors
 
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -11,9 +10,9 @@ mp_hands = mp.solutions.hands
 cont = 0
 
 buttons = {
-    1: {"label": "Pong", "script": './Pong/pong_menu.py', "pos": (0, 0), "size": (250, 100)},
-    2: {"label": "Jogo do Galo", "script": './JogoGalo/jogoGalo_menu.py', "pos": (0, 0), "size": (250, 100)},
-    3: {"label": "Quatro em Linha", "script": './QuatroLinha/quatrolinha_menu.py', "pos": (0, 0), "size": (250, 100)}
+    1: {"label": "Pong", "script": './Pong/pong_menu.py', "pos": (0, 0), "size": (275, 100)},
+    2: {"label": "tic-tac-toe", "script": './JogoGalo/jogoGalo_menu.py', "pos": (0, 0), "size": (275, 100)},
+    3: {"label": "Four in a row", "script": './QuatroLinha/quatrolinha_menu.py', "pos": (0, 0), "size": (275, 100)}
 }
 
 
@@ -51,8 +50,8 @@ def getHandMove(hand_landmarks):
 
     landmarks = hand_landmarks.landmark
 
-    indicador_x = int(landmarks[8].x * frame_width)
-    indicador_y = int(landmarks[8].y * frame_height)
+    indicador_x = int(landmarks[8].x * screen_width)
+    indicador_y = int(landmarks[8].y * screen_height)
 
     finger_in_buttons = False
 
@@ -70,38 +69,27 @@ def getHandMove(hand_landmarks):
         cont = 0
 
 
-def setButtonPos(frame_width, frame_height):
+def setButtonPos(screen_width, screen_height):
     global buttons
 
     button_width = 250
     total_buttons_width = len(buttons) * button_width
-    total_spacing = frame_width - total_buttons_width
+    total_spacing = screen_width - total_buttons_width
     spacing_between_buttons = total_spacing / (len(buttons) + 1)
 
     current_x = spacing_between_buttons
 
     for button_number, button_info in buttons.items():
         w, h = button_info["size"]
-        y = frame_height / 2 - h / 2
+        y = screen_height / 2 - h / 2
         button_info["pos"] = (int(current_x), int(y))
         current_x += button_width + spacing_between_buttons
-
 
 def open_script(script_name):
     subprocess.Popen([sys.executable, script_name])
     sys.exit()
 
-
 vid = cv.VideoCapture(0)
-
-screen = screeninfo.get_monitors()[0]
-frame_width = screen.width
-frame_height = screen.height
-
-vid.set(cv.CAP_PROP_FRAME_WIDTH, frame_width)
-vid.set(cv.CAP_PROP_FRAME_HEIGHT, frame_height)
-
-cv.namedWindow('Menu Inicial', cv.WINDOW_FULLSCREEN)
 
 with mp_hands.Hands(
         model_complexity=0,
@@ -114,12 +102,20 @@ with mp_hands.Hands(
         if not ret or frame is None:
             break
 
+        # Obtém a resolução da tela
+        screen = get_monitors()[0]
+        screen_width = int(screen.width - (screen.width / 8))
+        screen_height = int(screen.height - (screen.height / 8))
+
+        # Redimensiona o frame para se ajustar à tela
+        frame = cv.resize(frame, (screen_width, screen_height))
+
         frame = cv.flip(frame, 1)
         frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         results = hands.process(frame)
         frame = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
 
-        setButtonPos(frame_width, frame_height)
+        setButtonPos(screen_width, screen_height)
         hls = results.multi_hand_landmarks
         if hls and len(hls) == 1:
             getHandMove(hls[0])
@@ -134,7 +130,7 @@ with mp_hands.Hands(
         if results.multi_hand_landmarks:
             for hand_landmark in results.multi_hand_landmarks:
                 draw_yellow_dot(frame, (
-                int(hand_landmark.landmark[8].x * frame_width), int(hand_landmark.landmark[8].y * frame_height)))
+                int(hand_landmark.landmark[8].x * screen_width), int(hand_landmark.landmark[8].y * screen_height)))
 
         cv.imshow('Menu Inicial', frame)
 

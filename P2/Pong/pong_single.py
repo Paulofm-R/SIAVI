@@ -78,7 +78,7 @@ def set_squares(frame_height, frame_width):
     exitSquare["y2"] = int((frame_height / 2) + 82)
 
 def update_ball_position(screen_width, screen_height):
-    global player1_score, quantidade_raquetes, ultimo_ponto_tempo, lifes
+    global player1_score, quantidade_raquetes, ultimo_ponto_tempo, lifes, lifes_cont
     # Criar uma cópia do dicionário bolas antes de iterar sobre ele
     bolas_copy = bolas.copy()
     current_time = time.time()
@@ -175,8 +175,8 @@ def inicial_set(screen_width, screen_height):
 
 def adicionar_bola(screen_width, screen_height):
     bolas[len(bolas) + 1] = {
-        "x": random.randint(0, screen_width),
-        "y": random.randint(0, screen_height),
+        "x": screen_width // 2,
+        "y": screen_height // 2,
         "dir_x": random.choice([-1, 1]),
         "dir_y": random.choice([-1, 1]),
         "velocidade_x": 15,
@@ -241,7 +241,6 @@ def reset():
 def exit():
     # Fecha todas as janelas do OpenCV
     cv.destroyAllWindows()
-    cv.waitKey(1)  # Garante que todas as janelas sejam fechadas
 
     # Inicia o novo script usando subprocess.Popen
     subprocess.Popen([sys.executable, "./Pong/pong_menu.py"])

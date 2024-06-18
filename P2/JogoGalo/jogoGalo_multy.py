@@ -227,7 +227,6 @@ def reset():
 def exit():
     # Fecha todas as janelas do OpenCV
     cv.destroyAllWindows()
-    cv.waitKey(1)  # Garante que todas as janelas sejam fechadas
 
     # Inicia o novo script usando subprocess.Popen
     subprocess.Popen([sys.executable, "./JogoGalo/jogoGalo_menu.py"])
@@ -275,7 +274,7 @@ with mp_hands.Hands(
         for square_number, square_info in squares.items():
             x1, y1, x2, y2 = square_info["x1"], square_info["y1"], square_info["x2"], square_info["y2"]
             cv.rectangle(frame, (int(x1), int(y1)),
-                         (int(x2), int(y2)), (150, 150, 150), 1)
+                         (int(x2), int(y2)), (0, 150, 255), 10)
 
             if square_info['player1']:
                 centro_x = int((x1 + x2) / 2)
