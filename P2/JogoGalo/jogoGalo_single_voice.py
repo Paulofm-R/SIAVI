@@ -10,13 +10,6 @@ import sys
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
 
-def exit():
-    # Inicia o novo script usando subprocess.Popen
-    subprocess.Popen([sys.executable, "./JogoGalo/jogoGalo_menu.py"])
-
-    # Encerra o script atual
-    sys.exit()
-
 class TicTacToe:
     def __init__(self, root):
         self.root = root
@@ -140,14 +133,13 @@ class TicTacToe:
         }
         if command in mapping:
             if command == "sair":
-                exit()
+                self.exit_game()  # Chama a função exit_game
             else:
                 self.player_move(mapping[command])
     
     def exit_game(self):
-        self.root.quit()  # Fecha a janela do tkinter
-        self.root.update()  # Garante que a janela seja fechada antes de iniciar o novo script
-        exit()  # Chama a função exit para iniciar o novo script e encerrar o atual
+        subprocess.Popen([sys.executable, "./JogoGalo/jogoGalo_menu.py"])  # Inicia o novo script
+        self.root.destroy()  # Fecha e destrói a janela do tkinter
 
 
 if __name__ == "__main__":
