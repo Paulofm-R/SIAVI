@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="08510921-10c5-4971-be33-483557f913df" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuatroLinha/quatrolinha_multy.py" beforeDir="false" afterPath="$PROJECT_DIR$/QuatroLinha/quatrolinha_multy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuatroLinha/quatrolinha_single.py" beforeDir="false" afterPath="$PROJECT_DIR$/QuatroLinha/quatrolinha_single.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuatroLinha/quatrolinha_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/QuatroLinha/quatrolinha_menu.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,14 +45,16 @@
     "Python.quatrolinha_menu.executor": "Run",
     "Python.quatrolinha_multy.executor": "Run",
     "Python.quatrolinha_single.executor": "Run",
+    "Python.quatrolinha_single_hard.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/HP/Documents/GitHub/SIAVI/P2/JogoGalo"
+    "last_opened_file_path": "C:/Users/HP/Documents/GitHub/SIAVI/P2/QuatroLinha"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\HP\Documents\GitHub\SIAVI\P2\QuatroLinha" />
       <recent name="C:\Users\HP\Documents\GitHub\SIAVI\P2\JogoGalo" />
     </key>
   </component>

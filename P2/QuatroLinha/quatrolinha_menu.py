@@ -13,6 +13,8 @@ buttons = {
     1: {"label": "Voltar", "script": './menu.py', "pos": (0, 0), "size": (275, 100)},
     2: {"label": "1 Player", "script": './QuatroLinha/quatrolinha_single.py', "pos": (0, 0), "size": (275, 100)},
     3: {"label": "2 Players", "script": './QuatroLinha/quatrolinha_multy.py', "pos": (0, 0), "size": (275, 100)},
+    4: {"label": "1 Player Hard", "script": './QuatroLinha/quatrolinha_single_hard.py', "pos": (0, 0), "size": (275, 100)},
+
 }
 
 def getHandMove(hand_landmarks):
