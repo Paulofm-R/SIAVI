@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="08510921-10c5-4971-be33-483557f913df" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/JogoGalo/jogoGalo_single.py" beforeDir="false" afterPath="$PROJECT_DIR$/JogoGalo/jogoGalo_single.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuatroLinha/quatrolinha_single.py" beforeDir="false" afterPath="$PROJECT_DIR$/QuatroLinha/quatrolinha_single.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
