@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="08510921-10c5-4971-be33-483557f913df" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/JogoGalo/jogoGalo_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/JogoGalo/jogoGalo_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pong/pong_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pong/pong_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuatroLinha/quatrolinha_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/QuatroLinha/quatrolinha_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/JogoGalo/jogoGalo_single.py" beforeDir="false" afterPath="$PROJECT_DIR$/JogoGalo/jogoGalo_single.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,24 +27,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Python.exercise_app.executor&quot;: &quot;Run&quot;,
-    &quot;Python.jogoGalo_menu.executor&quot;: &quot;Run&quot;,
-    &quot;Python.jogoGalo_single.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.menu.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pong_menu.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pong_single.executor&quot;: &quot;Run&quot;,
-    &quot;Python.quatrolinha_menu.executor&quot;: &quot;Run&quot;,
-    &quot;Python.quatrolinha_single.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/HP/Documents/GitHub/SIAVI/P2/JogoGalo&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Python.exercise_app.executor": "Run",
+    "Python.jogoGalo_menu.executor": "Run",
+    "Python.jogoGalo_single.executor": "Run",
+    "Python.jogoGalo_single_voice.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.menu.executor": "Run",
+    "Python.pong.executor": "Run",
+    "Python.pong_menu.executor": "Run",
+    "Python.pong_multy.executor": "Run",
+    "Python.pong_multy_powerups.executor": "Run",
+    "Python.pong_single.executor": "Run",
+    "Python.pong_single_easy.executor": "Run",
+    "Python.quatrolinha_menu.executor": "Run",
+    "Python.quatrolinha_single.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/HP/Documents/GitHub/SIAVI/P2/JogoGalo"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\HP\Documents\GitHub\SIAVI\P2\JogoGalo" />

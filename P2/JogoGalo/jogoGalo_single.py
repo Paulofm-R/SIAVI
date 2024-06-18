@@ -346,7 +346,7 @@ with mp_hands.Hands(
         for square_number, square_info in squares.items():
             x1, y1, x2, y2 = square_info["x1"], square_info["y1"], square_info["x2"], square_info["y2"]
             cv.rectangle(frame, (int(x1), int(y1)),
-                         (int(x2), int(y2)), (150, 150, 150), 1)
+                         (int(x2), int(y2)), (0, 165, 255), 10)
 
             if square_info['player1']:
                 centro_x = int((x1 + x2) / 2)
@@ -378,6 +378,9 @@ with mp_hands.Hands(
         # Exibe a pontuação
         cv.putText(frame, f"Player 1: {player1_wins}", (50, 50),
                    cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+
+
         cv.putText(frame, f"Computer: {computer_wins}", (screen_width -
                    200, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
@@ -388,8 +391,8 @@ with mp_hands.Hands(
             else:
                 final_sentence = "DRAW!!"
 
-            cv.rectangle(frame, (int((screen_width / 2) - 200), int((screen_height / 2) - 75)),
-                         (int((screen_width / 2) + 200), int((screen_height / 2) + 75)), (0, 0, 0), -1)
+            cv.rectangle(frame, (int((screen_width / 2.5) - 200), int((screen_height / 2) - 75)),
+                         (int((screen_width / 2) + 200), int((screen_height / 2) + 75)), (255,140, 0), -1)
             cv.putText(frame, final_sentence, (int((screen_width / 2) - 165), int(
                 (screen_height / 2) + 20)), cv.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
 
@@ -398,7 +401,7 @@ with mp_hands.Hands(
             cv.putText(frame, "EXIT", (150, int((screen_height / 2) - 90)),
                        cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        
+
         cv.imshow('frame', frame)
 
         if cv.waitKey(1) & 0xFF == ord('q'):
