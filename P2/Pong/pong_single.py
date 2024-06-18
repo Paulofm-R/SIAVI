@@ -212,7 +212,7 @@ def getHandMove(hand_landmarks, frame_width, frame_height):
         cont = 0  # Resetar o contador se o dedo não estiver em nenhum quadrado
 
 def reset():
-    global RAQUETE_WIDTH, RAQUETE_HEIGHT, RAQUETE_VELOCIDADE, player1_score, player1_x, player2_x, bolas, lifes, set
+    global RAQUETE_WIDTH, RAQUETE_HEIGHT, RAQUETE_VELOCIDADE, player1_score, player1_x, player2_x, bolas, lifes, set, lifes_cont
 
     RAQUETE_WIDTH = 175
     RAQUETE_HEIGHT = 25
@@ -239,6 +239,7 @@ def reset():
 
     set = False
     lifes = 3
+    lifes_cont = 0
 
 def exit():
     # Fecha todas as janelas do OpenCV
