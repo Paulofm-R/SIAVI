@@ -4,9 +4,6 @@ import random
 import subprocess
 import sys
 from screeninfo import get_monitors
-import speech_recognition as sr # Audio para texto
-import threading
-
 
 win = ''
 player1_wins = 0
@@ -104,14 +101,6 @@ exitSquare = {
     "y2": 0,
 }
 
-voiceComandSquare = {
-    "x1": 0,
-    "y1": 0,
-    "x2": 0,
-    "y2": 0,
-}
-
-voiceComandAtive = False
 
 def set_squares(screen_height, screen_width):
     global squares, resetSquare, exitSquare
@@ -145,11 +134,6 @@ def set_squares(screen_height, screen_width):
     exitSquare["y1"] = int((screen_height / 2) - 82)
     exitSquare["x2"] = screen_width - 300
     exitSquare["y2"] = int((screen_height / 2) + 82)
-
-    voiceComandSquare["x1"] = 200
-    voiceComandSquare["y1"] = int((screen_height / 4) - 50)
-    voiceComandSquare["x2"] = 100
-    voiceComandSquare["y2"] = int((screen_height / 4) + 50)
 
 def getHandMove(hand_landmarks):
     global squares, cont, player_turn, moves, voiceComandAtive
@@ -191,13 +175,6 @@ def getHandMove(hand_landmarks):
             cont += 1
             if cont >= 25:  # Se o dedo estiver no local por 50 frames
                 exit()
-    
-    if voiceComandSquare["x1"] > indicador_x > voiceComandSquare["x2"] and voiceComandSquare["y1"] < indicador_y < voiceComandSquare["y2"]:
-            finger_in_square = True
-            cont += 1
-            if cont >= 25:  # Se o dedo estiver no local por 50 frames
-                voiceComandAtive = not voiceComandAtive
-                cont = 0
 
     if not finger_in_square:
         cont = 0  # Resetar o contador se o dedo não estiver em nenhum quadrado
@@ -329,55 +306,6 @@ def exit():
     # Encerra o script atual
     sys.exit()
 
-def voice_command_recognition():
-    global recognition_running, player_turn, moves, voiceComandAtive, win
-
-    recognizer = sr.Recognizer()
-    while True:
-        if not voiceComandAtive:
-            continue
-        try:
-            with sr.Microphone() as mic:
-                audio = recognizer.listen(mic)
-                command = recognizer.recognize_google(audio, language="pt-BR").lower()
-                print(command)
-                if command == "um":
-                    command = 1
-                elif command == "dois":
-                    command = 2
-                elif command == "tres":
-                    command = 3
-                elif command == "quatro":
-                    command = 4
-                elif command == "cinco":
-                    command = 5
-                elif command == "seis":
-                    command = 6
-                elif command == "sete":
-                    command = 7
-                elif command == "oito":
-                    command = 8
-                elif command == "nove":
-                    command = 9
-
-                if "resetar" in command or "reiniciar" in command:
-                    reset()
-                elif "sair" in command or "fechar" in command:
-                    sys.exit()
-                elif player_turn == "player1" and win == "":
-                    for square_id in range(1, 10):
-                        if str(square_id) in command:
-                            if not squares[square_id]["player1"] and not squares[square_id]["computer"]:
-                                squares[square_id]["player1"] = True
-                                check_winner(squares)
-                                if win == "":
-                                    player_turn = "computer"
-                                    moves += 1
-        except Exception as e:
-            print("Erro no reconhecimento de voz: ", e)
-
-threading.Thread(target=voice_command_recognition, daemon=True).start()
-
 vid = cv.VideoCapture(0)
 
 with mp_hands.Hands(
@@ -444,9 +372,6 @@ with mp_hands.Hands(
                          (resetSquare["x2"], resetSquare["y2"]), (174, 173, 178), 3)
             cv.rectangle(frame, (exitSquare["x1"], exitSquare["y1"]),
                          (exitSquare["x2"], exitSquare["y2"]), (174, 173, 178), 3)
-            
-        cv.rectangle(frame, (voiceComandSquare["x1"], voiceComandSquare["y1"]),
-                         (voiceComandSquare["x2"], voiceComandSquare["y2"]), (174, 173, 178), 3)
 
         frame = cv.flip(frame, 1)
 
@@ -473,11 +398,6 @@ with mp_hands.Hands(
             cv.putText(frame, "EXIT", (150, int((screen_height / 2) - 90)),
                        cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        cv.putText(frame, "Voice Comand", (screen_width - 275, int((screen_height / 4) - 60)),
-                       cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        if voiceComandAtive:
-            cv.putText(frame, "V", (screen_width - 170, int((screen_height / 4) + 30)),
-                       cv.FONT_HERSHEY_SIMPLEX, 3, (0, 255, 0), 3)
         
         cv.imshow('frame', frame)
 
