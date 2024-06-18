@@ -3,8 +3,7 @@ import mediapipe as mp
 import numpy as np
 import math
 import time
-import sys
-import subprocess
+import random
 
 # Set up MediaPipe hands module
 mp_hands = mp.solutions.hands
@@ -20,16 +19,39 @@ GRID_HEIGHT = ROWS * CELL_HEIGHT
 X_OFFSET = (640 - GRID_WIDTH) // 2
 Y_OFFSET = (480 - GRID_HEIGHT) // 2
 
+# Load gear icon image
+gear_icon_path = "./QuatroLinha/gear_icon.png"  # Path to your gear icon image
+gear_icon = cv2.imread(gear_icon_path, cv2.IMREAD_UNCHANGED)
+
+if gear_icon is None:
+    print("Error: Gear icon image not found at path:", gear_icon_path)
+
 # Initialize game board
 board = np.zeros((ROWS, COLS))
 player_turn = 1
 game_over = False
-selected_column = 0  # Initialize selected column
+selected_column = None  # Initialize selected column as None
 
+# Reset button parameters
+RESET_BUTTON_X = 50  # X position of the reset button
+RESET_BUTTON_Y = 620  # Y position of the reset button
+RESET_BUTTON_SIZE = 100  # Size of the reset button
+reset_active = False  # Flag to indicate if reset is active
+
+# Constants for gesture sensitivity and smoothing
+THUMBS_UP_THRESHOLD = 0.9  # Adjust as needed
+SMOOTHING_ALPHA = 0.5  # Smoothing factor
+THUMBS_UP_FRAME_COUNT = 15  # Number of frames to hold the gesture
+
+# State variables for gesture detection
+gesture_state = "No Gesture"
+gesture_start_time = 0
+
+# Function to map hand x coordinate to column index
 def map_hand_to_column(hand_x):
-    # Map hand x-coordinate to column index
     return min(max(int((hand_x - X_OFFSET) / CELL_WIDTH), 0), COLS - 1)
 
+# Function to drop a token in a column
 def drop_token(column):
     for row in range(ROWS - 1, -1, -1):
         if board[row][column] == 0:
@@ -37,8 +59,8 @@ def drop_token(column):
             return row, column
     return None
 
+# Function to draw the game board
 def draw_grid(frame):
-    # Draw grid lines
     for i in range(COLS + 1):
         cv2.line(frame, (X_OFFSET + i * CELL_WIDTH, Y_OFFSET),
                  (X_OFFSET + i * CELL_WIDTH, Y_OFFSET + GRID_HEIGHT),
@@ -48,34 +70,43 @@ def draw_grid(frame):
                  (X_OFFSET + GRID_WIDTH, Y_OFFSET + j * CELL_HEIGHT),
                  (255, 255, 255), 2)
 
-    # Highlight selected column
-    cv2.rectangle(frame, (X_OFFSET + selected_column * CELL_WIDTH, Y_OFFSET),
-                  (X_OFFSET + (selected_column + 1) * CELL_WIDTH, Y_OFFSET + GRID_HEIGHT),
-                  (0, 255, 0), 2)
+    if selected_column is not None:
+        cv2.rectangle(frame, (X_OFFSET + selected_column * CELL_WIDTH, Y_OFFSET),
+                      (X_OFFSET + (selected_column + 1) * CELL_WIDTH, Y_OFFSET + GRID_HEIGHT),
+                      (0, 255, 0), 2)
 
+    if gear_icon is not None:
+        gear_icon_resized = cv2.resize(gear_icon, (40, 40))
+        gear_icon_resized_bgr = gear_icon_resized[:, :, :3]
+        alpha_channel = gear_icon_resized[:, :, 3]
+        alpha_mask = alpha_channel / 255.0
+
+        for c in range(3):
+            frame[Y_OFFSET - 50:Y_OFFSET - 10, X_OFFSET + GRID_WIDTH - 50:X_OFFSET + GRID_WIDTH - 10, c] = \
+                (alpha_mask * gear_icon_resized_bgr[:, :, c] + (1 - alpha_mask) * frame[Y_OFFSET - 50:Y_OFFSET - 10,
+                                                                                  X_OFFSET + GRID_WIDTH - 50:X_OFFSET + GRID_WIDTH - 10,
+                                                                                  c])
+
+# Function to check for a win
 def check_win(board, player):
-    # Check rows
     for row in range(ROWS):
         for col in range(COLS - 3):
             if board[row][col] == player and board[row][col + 1] == player and board[row][col + 2] == player and \
                     board[row][col + 3] == player:
                 return True
 
-    # Check columns
     for col in range(COLS):
         for row in range(ROWS - 3):
             if board[row][col] == player and board[row + 1][col] == player and board[row + 2][col] == player and \
                     board[row + 3][col] == player:
                 return True
 
-    # Check diagonals (top-left to bottom-right)
     for row in range(ROWS - 3):
         for col in range(COLS - 3):
             if board[row][col] == player and board[row + 1][col + 1] == player and board[row + 2][col + 2] == player and \
                     board[row + 3][col + 3] == player:
                 return True
 
-    # Check diagonals (top-right to bottom-left)
     for row in range(ROWS - 3):
         for col in range(3, COLS):
             if board[row][col] == player and board[row + 1][col - 1] == player and board[row + 2][col - 2] == player and \
@@ -84,105 +115,204 @@ def check_win(board, player):
 
     return False
 
-def draw_buttons(frame):
-    cv2.rectangle(frame, (150, 200), (250, 250), (0, 255, 0), -1)
-    cv2.putText(frame, 'RESET', (160, 230), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.rectangle(frame, (400, 200), (500, 250), (0, 0, 255), -1)
-    cv2.putText(frame, 'EXIT', (420, 230), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+# Function for the computer's play
+def computer_play():
+    available_columns = [col for col in range(COLS) if 0 in board[:, col]]
+    best_score = -float('inf')
+    best_column = random.choice(available_columns)
 
+    for col in available_columns:
+        row = next(r for r in range(ROWS - 1, -1, -1) if board[r][col] == 0)
+        board[row][col] = 2
+        if check_win(board, 2):
+            board[row][col] = 0
+            return col
+        board[row][col] = 0
+
+    for col in available_columns:
+        row = next(r for r in range(ROWS - 1, -1, -1) if board[r][col] == 0)
+        board[row][col] = 1
+        if check_win(board, 1):
+            board[row][col] = 0
+            return col
+        board[row][col] = 0
+
+    for col in available_columns:
+        if board[0][col] == 0:
+            board[0][col] = 2
+            score = evaluate_board(board, 2)
+            board[0][col] = 0
+            if score > best_score:
+                best_score = score
+                best_column = col
+
+    return best_column
+
+# Function to evaluate the board and score potential moves
+def evaluate_board(board, player):
+    score = 0
+    center_array = [int(i) for i in list(board[:, COLS // 2])]
+    center_count = center_array.count(player)
+    score += center_count * 3
+
+    for row in range(ROWS):
+        row_array = [int(i) for i in list(board[row, :])]
+        for col in range(COLS - 3):
+            window = row_array[col:col + 4]
+            score += evaluate_window(window, player)
+
+    for col in range(COLS):
+        col_array = [int(i) for i in list(board[:, col])]
+        for row in range(ROWS - 3):
+            window = col_array[row:row + 4]
+            score += evaluate_window(window, player)
+
+    for row in range(ROWS - 3):
+        for col in range(COLS - 3):
+            window = [board[row + i][col + i] for i in range(4)]
+            score += evaluate_window(window, player)
+
+    for row in range(ROWS - 3):
+        for col in range(COLS - 3):
+            window = [board[row + 3 - i][col + i] for i in range(4)]
+            score += evaluate_window(window, player)
+
+    return score
+
+# Function to evaluate a window of 4 cells
+def evaluate_window(window, player):
+    score = 0
+    opponent = 1 if player == 2 else 2
+
+    if window.count(player) == 4:
+        score += 100
+    elif window.count(player) == 3 and window.count(0) == 1:
+        score += 5
+    elif window.count(player) == 2 and window.count(0) == 2:
+        score += 2
+
+    if window.count(opponent) == 3 and window.count(0) == 1:
+        score -= 4
+
+    return score
+
+# Function to draw reset button
+def draw_reset_button(frame):
+    cv2.rectangle(frame, (RESET_BUTTON_X, RESET_BUTTON_Y),
+                  (RESET_BUTTON_X + RESET_BUTTON_SIZE, RESET_BUTTON_Y + RESET_BUTTON_SIZE),
+                  (255, 255, 255), 2)
+    cv2.putText(frame, "RESET", (RESET_BUTTON_X + 10, RESET_BUTTON_Y + 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+(255, 255, 255), 2, cv2.LINE_AA)
+
+# Function to display the win screen and reset button
+def display(frame, player_turn):
+    display_win_screen(frame, player_turn)
+
+# Function to display the win screen
+def display_win_screen(frame, player):
+    text = f"{'Player' if player == 2 else 'Player'} {player} Wins!"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 2
+    font_thickness = 3
+    text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
+    text_x = (frame.shape[1] - text_size[0]) // 2
+    text_y = (frame.shape[0] + text_size[1]) // 2
+    cv2.putText(frame, text, (text_x, text_y), font, font_scale, (0, 255, 0), font_thickness, cv2.LINE_AA)
+
+    # Draw reset button
+    reset_text = "Press 'r' to Reset"
+    reset_text_size = cv2.getTextSize(reset_text, font, 1, 2)[0]
+    reset_text_x = (frame.shape[1] - reset_text_size[0]) // 2
+    reset_text_y = text_y + text_size[1] + reset_text_size[1]
+    cv2.putText(frame, reset_text, (reset_text_x, reset_text_y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+# Function to reset the game
 def reset_game():
-    global board, player_turn, game_over, selected_column, last_play_time
+    global board, player_turn, game_over, selected_column
     board = np.zeros((ROWS, COLS))
     player_turn = 1
     game_over = False
-    selected_column = 0
-    last_play_time = time.time()
-
-# Função para sair
-def exit():
-    # Fecha todas as janelas do OpenCV
-    cv2.destroyAllWindows()
-
-    # Inicia o novo script usando subprocess.Popen
-    subprocess.Popen([sys.executable, "./QuatroLinha/quatrolinha_menu.py"])
-
-    # Encerra o script atual
-    sys.exit()
-
-# Função para verificar se a mão está sobre um botão e realiza uma ação
-def check_button_press(hand_x, hand_y):
-    global last_play_time
-    if 150 <= hand_x <= 250 and 200 <= hand_y <= 250:
-        current_time = time.time()
-        if current_time - last_play_time >= play_delay:
-            last_play_time = current_time
-            reset_game()
-    elif 400 <= hand_x <= 500 and 200 <= hand_y <= 250:
-        current_time = time.time()
-        if current_time - last_play_time >= play_delay:
-            last_play_time = current_time
-            exit()
+    selected_column = None
 
 # Main loop
 cap = cv2.VideoCapture(0)
-
-# Delay between plays (in seconds)
 play_delay = 2
-
-# Time of the last play
 last_play_time = 0
 
+# Main loop
+# Main loop
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
 
-    # Flip frame horizontally for selfie-view display
     frame = cv2.flip(frame, 1)
 
-    # Process frame to detect hands
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(frame_rgb)
 
-    if results.multi_hand_landmarks:
+    # Check for hand gestures (Player 1)
+    if results.multi_hand_landmarks and not game_over and player_turn == 1:
         for hand_landmarks in results.multi_hand_landmarks:
-            # Extract hand landmarks
             hand_x = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * frame.shape[1]
             hand_y = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * frame.shape[0]
             thumb_x = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * frame.shape[1]
             thumb_y = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * frame.shape[0]
 
-            # Check if thumb and index finger are pinching
-            if math.sqrt((hand_x - thumb_x) ** 2 + (hand_y - thumb_y) ** 2) < 30:
-                if game_over:
-                    check_button_press(hand_x, hand_y)
-                else:
-                    # Map hand x-coordinate to column index
-                    selected_column = map_hand_to_column(hand_x)
+            # Draw landmarks for debugging
+            cv2.circle(frame, (int(hand_x), int(hand_y)), 5, (0, 255, 0), -1)
+            cv2.circle(frame, (int(thumb_x), int(thumb_y)), 5, (0, 0, 255), -1)
 
-                    # Check if it's time for the next play
+            # Detect thumbs up gesture (index finger and thumb close together)
+            if math.sqrt((hand_x - thumb_x) ** 2 + (hand_y - thumb_y) ** 2) < 30:
+                if gesture_state == "No Gesture":
+                    gesture_state = "Thumbs Up"
+                    gesture_start_time = time.time()
+                elif gesture_state == "Thumbs Up" and time.time() - gesture_start_time >= THUMBS_UP_FRAME_COUNT / 30:
+                    selected_column = map_hand_to_column(hand_x)
                     current_time = time.time()
                     if current_time - last_play_time >= play_delay:
-                        # Drop token into selected column
                         play_result = drop_token(selected_column)
                         if play_result:
-                            # Check for win
+                            print(f"Player {player_turn} drops token in column {selected_column}")
                             if check_win(board, player_turn):
-                                print("Player", player_turn, "wins!")
+                                print(f"Player {player_turn} wins!")
                                 game_over = True
                             else:
-                                # Switch player turn
-                                player_turn = 2 if player_turn == 1 else 1
+                                player_turn = 2  # Switch to Player 2's turn
                                 last_play_time = current_time
-                                print("Player", player_turn, "plays.")
+                            print("Current Board:\n", board)
+                        else:
+                            print("Invalid move or column full")
+                    else:
+                        print("Player action too fast")
+                else:
+                    print("Gesture time not met")
 
-                                # Uncomment this line if you want to see the updated board after each play
-                                # print(board)
+    else:
+        gesture_state = "No Gesture"
 
-    # Draw grid lines and highlight selected column on frame
+    # Check for keyboard input (Player 2)
+    if player_turn == 2 and not game_over:
+        key = cv2.waitKey(1) & 0xFF
+        if key in range(ord('1'), ord('1') + COLS):
+            selected_column = key - ord('1')
+            play_result = drop_token(selected_column)
+            if play_result:
+                print(f"Player {player_turn} drops token in column {selected_column}")
+                if check_win(board, player_turn):
+                    print(f"Player {player_turn} wins!")
+                    game_over = True
+                else:
+                    player_turn = 1  # Switch back to Player 1's turn
+                print("Current Board:\n", board)
+            else:
+                print("Invalid move or column full")
+
     draw_grid(frame)
 
-    # Draw tokens on frame
+    # Draw tokens on the board
     for r in range(ROWS):
         for c in range(COLS):
             if board[r][c] == 1:
@@ -194,17 +324,25 @@ while cap.isOpened():
                            (X_OFFSET + c * CELL_WIDTH + CELL_WIDTH // 2, Y_OFFSET + r * CELL_HEIGHT + CELL_HEIGHT // 2),
                            min(CELL_WIDTH, CELL_HEIGHT) // 3, (0, 255, 255), -1)
 
+    # Display win screen if game over
     if game_over:
-        cv2.putText(frame, f"Player {player_turn} wins!", (200, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        draw_buttons(frame)
+        display_win_screen(frame, player_turn)
 
-    # Display frame
-    cv2.imshow('Connect Four', frame)
+    # Draw reset button
+    draw_reset_button(frame)
 
-    # Check for exit key
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    # Display the frame with game interface
+    cv2.imshow('Connect Four - Multiplayer', frame)
+
+    # Check for reset or quit game
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('r'):
+        reset_game()
+        print("Game Reset!")
+        print("Current Board:\n", board)
+    elif key == ord('q'):
         break
 
-# Clean up
+# Release the camera and close all windows
 cv2.destroyAllWindows()
 cap.release()
