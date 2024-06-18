@@ -97,6 +97,7 @@ def update_ball_position(screen_width, screen_height):
             if bola_id not in ultimo_ponto_tempo or current_time - ultimo_ponto_tempo[bola_id] > 1:
                 if bola["y"] >= screen_height - RAQUETE_HEIGHT and player1_x <= bola["x"] <= player1_x + RAQUETE_WIDTH:
                     player1_score += 1
+                    lifes_cont += 1
                     ultimo_ponto_tempo[bola_id] = current_time
 
                     bola["dir_y"] *= -1
@@ -109,6 +110,7 @@ def update_ball_position(screen_width, screen_height):
             if bola_id not in ultimo_ponto_tempo or current_time - ultimo_ponto_tempo[bola_id] > 1:
                 if (bola["y"] >= screen_height - RAQUETE_HEIGHT and player1_x <= bola["x"] <= player1_x + RAQUETE_WIDTH) or (bola["y"] >= screen_height - RAQUETE_HEIGHT and player2_x <= bola["x"] <= player2_x + RAQUETE_WIDTH):
                     player1_score += 1
+                    lifes_cont += 1
                     ultimo_ponto_tempo[bola_id] = current_time
 
 
