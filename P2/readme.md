@@ -12,10 +12,15 @@
 
 ## Dependencisa
 ```shell
- pip install opencv-python mediapipe SpeechRecognition pyaudio screeninfo
+    pip install opencv-python mediapipe SpeechRecognition pyaudio screeninfo
 ```
 
-### Como iniciar pelo VSC/Pycharm?
+### Como iniciar pelo VSC/Pycharm:
 
 Devera correr o projeto a partir da pasta começando pelo "menu.py"
+
+Exemplo:
+```shell
+    python menu.py
+```
 
